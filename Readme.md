@@ -3,5 +3,7 @@
 ## 安装
 ```python
 pip install virtualenv
-virtualenv
+virtualenv --python=python3 py3
+source py3/bin/activate
+python run.py
 ```
