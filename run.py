@@ -1,4 +1,4 @@
-#! /env python
+﻿#! /env python
 # _*_ coding:utf8 _*_
 # @author:ren
 # @date:2018/7/18.11:09
@@ -59,6 +59,6 @@ def create_app(object=ProdConfig):
 
 app = create_app()
 
-if __name__ == '__main__':
-    print (app.url_map)
-    app.run()
+# if __name__ == '__main__':
+#    print (app.url_map)
+#    app.run()
