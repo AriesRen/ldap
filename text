@@ -1,0 +1,39 @@
+用户
+
+    1. 新增用户
+    /user        post
+    参数： uid：用户账号
+           company：公司名称
+           department：部门名称
+           password：密码
+           sn：姓
+           givenName：名
+           group：组名
+     返回： code
+
+    2. 删除用户
+    /user/{uid}  delete
+    3. 修改密码
+    /user/{uid}  put  password
+    4. 添加到组
+    /user/{uid}  put  group
+    5. 查看用户
+    /user/{uid}  get
+
+组
+
+    1. 向组内添加成员
+    2. 从组内删除用户
+    /group/{member} delete
+    3. 查看组
+    /group/{group}        get
+    4、查看所有组
+    /group get
+
+部门
+
+    1. 新增部门
+    /department   post
+    2. 查看所有部门
+    /department get
+
