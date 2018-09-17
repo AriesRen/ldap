@@ -26,10 +26,10 @@ def create_app(config_name):
     @app.before_request
     def before_request():
         try:
-            host = current_app.config["HOST"]
-            base_dn = current_app.config["BASE_DN"]
-            admin = current_app.config['ADMIN']
-            adminpwd = current_app.config['ADMIN_PWD']
+            host = current_app.config["LDAP_HOST"]
+            base_dn = current_app.config["LDAP_BASE_DN"]
+            admin = current_app.config['LDAP_ADMIN']
+            adminpwd = current_app.config['LDAP_ADMIN_PWD']
 
             server = ldap3.Server(host=host, get_info=ldap3.ALL)
             g.conn = ldap3.Connection(server=server, user=admin, password=adminpwd)
@@ -55,7 +55,7 @@ def create_app(config_name):
     def after_request(response):
         # 跨域响应头
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Method'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = '*'
         # json格式
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -73,5 +73,5 @@ def create_app(config_name):
 app = create_app("prod")
 
 if __name__ == '__main__':
-    app.logger.info("服务器启动")
+    app.logger.info('服务器启动：http://0.0.0.0:5000')
     app.run(host='0.0.0.0',port='5000')

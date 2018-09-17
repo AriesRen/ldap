@@ -119,6 +119,26 @@ def search_all_user(conn):
         except Exception as e:
             raise e
 
+# 分页查询用户
+def search_page_user(conn, page, size):
+    """
+    分页查询用户信息
+    :param conn: 连接
+    :param page: page页
+    :param size: 大小
+    :return:
+    """
+    if isinstance(conn, ldap3.Connection):
+        try:
+            search_filter = '(objectClass=person)'
+            base_dn = current_app.config["BASE_DN"]
+            conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
+                        attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
+            users = json.loads(conn.response_to_json())['entries']
+            return (True, users)
+        except Exception as e:
+            raise e
+
 
 
 # 修改用户密码

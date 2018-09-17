@@ -5,12 +5,12 @@
 
 import os
 import logging
+import sys
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    PORT = 9000
     # Logger
     LOG_PATH = os.path.join(basedir, 'logs')
     LOG_PATH_ERROR = os.path.join(LOG_PATH, 'error.log')
@@ -27,24 +27,27 @@ class Config:
 
 class DevConfig(Config):
     DEBUG = True
+    PORT = '5000'
 
     # 测试服务器
-    HOST = "192.168.142.128"
-    BASE_DN = "DC=rhg,DC=com"
+    LDAP_HOST = "192.168.142.128"
+    LDAP_BASE_DN = "DC=rhg,DC=com"
     # 管理员账号密码
-    ADMIN = "RHG\\Administrator"
-    ADMIN_PWD = "!Password"
+    LDAP_ADMIN = "RHG\\Administrator"
+    LDAP_ADMIN_PWD = "!Password"
 
 
 class ProdConfig(Config):
-    DEBUG = False
+    DEBUG = True
+    HOST = '0.0.0.0'
+    PORT = '5000'
 
     # 正式服务器
-    HOST = "172.16.0.3"
-    BASE_DN = "DC=bw,DC=local"
+    LDAP_HOST = "172.16.0.3"
+    LDAP_BASE_DN = "DC=bw,DC=local"
     # 管理员账号密码
-    ADMIN = "bw\\administrator"
-    ADMIN_PWD = "qaz.1234"
+    LDAP_ADMIN = "bw\\administrator"
+    LDAP_ADMIN_PWD = "qaz.1234"
 
     @classmethod
     def init_app(cls, app):
@@ -56,13 +59,13 @@ class ProdConfig(Config):
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(pathname)s %(lineno)s %(message)s')
 
         # info file handler
-        file_handler_info = RotatingFileHandler(filename=cls.LOG_PATH_INFO,encoding="utf8",mode="a")
+        file_handler_info = RotatingFileHandler(filename=cls.LOG_PATH_INFO,encoding="utf8",mode="a", maxBytes=cls.LOG_FILE_MAX_BYTES, backupCount=cls.LOG_FILE_BACKUP_COUNT)
         file_handler_info.setFormatter(formatter)
-        file_handler_info.setLevel(logging.INFO)
+        file_handler_info.setLevel(logging.DEBUG)
         app.logger.addHandler(file_handler_info)
 
         # error file handler
-        file_handler_error = RotatingFileHandler(filename=cls.LOG_PATH_ERROR,encoding="utf8",mode="a")
+        file_handler_error = RotatingFileHandler(filename=cls.LOG_PATH_ERROR,encoding="utf8",mode="a", maxBytes=cls.LOG_FILE_MAX_BYTES, backupCount=cls.LOG_FILE_BACKUP_COUNT)
         file_handler_error.setFormatter(formatter)
         file_handler_error.setLevel(logging.ERROR)
         app.logger.addHandler(file_handler_error)
