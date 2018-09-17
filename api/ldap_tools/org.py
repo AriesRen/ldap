@@ -21,7 +21,7 @@ def search_org(conn, ou=None):
                       -- if orginazation not exist return (False, None)
     搜索部门组织，存在返回（Ture，org dn)
     """
-    base_dn = current_app.config["BASE_DN"]
+    base_dn = current_app.config["LDAP_BASE_DN"]
     if isinstance(conn, ldap3.Connection):
         search_filter = '(&(|(name={})(ou={}))(objectClass=OrganizationalUnit))'.format(ou, ou)
         conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
@@ -45,7 +45,7 @@ def search_all_org(conn):
     if isinstance(conn, ldap3.Connection):
         try:
             search_filter = '(objectClass=OrganizationalUnit)'
-            base_dn = current_app.config["BASE_DN"]
+            base_dn = current_app.config["LDAP_BASE_DN"]
             conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
                     attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
             orgs = json.loads(conn.response_to_json())['entries']
@@ -68,7 +68,7 @@ def add_org(conn, department, company):
                 return (False, "The org already exists")
             # 2、新增部门
             objectClass= ["top","organizationalUnit" ]
-            org_dn = "ou={},ou={},".format(department, company) + current_app.config["BASE_DN"]
+            org_dn = "ou={},ou={},".format(department, company) + current_app.config["LDAP_BASE_DN"]
             attributes = {"name": department}
 
             res = conn.add(dn=org_dn,object_class=objectClass,attributes=attributes,controls=None)

@@ -23,7 +23,7 @@ def search_group(conn, group):
                       -- if group not exist return (False, None, None)
     搜索组，存在返回组成员列表（Ture，group_dn, [members list:])
     """
-    base_dn = current_app.config["BASE_DN"]
+    base_dn = current_app.config["LDAP_BASE_DN"]
     if isinstance(conn, ldap3.Connection):
         search_filter = '(&(|(name={})(cn={}))(objectClass=group))'.format(group, group)
         conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
@@ -40,7 +40,7 @@ def search_group(conn, group):
 
 # 搜索所有用户组
 def search_all_group(conn):
-    base_dn = current_app.config["BASE_DN"]
+    base_dn = current_app.config["LDAP_BASE_DN"]
     if isinstance(conn, ldap3.Connection):
         search_filter = '(objectClass=group)'
         conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
@@ -70,7 +70,7 @@ def add_group(conn, group, department, company):
                 return (False, "The group already exists")
             # 3、新增用户组
             objectClass= ["top","group" ]
-            group_dn = "cn={},ou={},ou={},".format(group ,department, company) + current_app.config["BASE_DN"]
+            group_dn = "cn={},ou={},ou={},".format(group ,department, company) + current_app.config["LDAP_BASE_DN"]
             attributes = {"name": group,"sAMAccountName":group}
 
             res = conn.add(dn=group_dn,object_class=objectClass,attributes=attributes,controls=None)

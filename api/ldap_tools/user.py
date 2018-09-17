@@ -42,7 +42,7 @@ def add_user(conn, user=None):
             return (False, "This organizational {}-{} is not exists".format(company, department))
 
         # 3、构造所需参数
-        user_dn = "cn={},ou={},ou={},".format(uid, department, company) + current_app.config["BASE_DN"]
+        user_dn = "cn={},ou={},ou={},".format(uid, department, company) + current_app.config["LDAP_BASE_DN"]
         attributes = {"sn": sn, "givenName": givenName, "sAMAccountName": uid, "displayName": sn + givenName,
                       "userPrincipalName": uid }
         objectClass = ['top', 'person', 'user', "organizationalPerson"]
@@ -88,7 +88,7 @@ def search_user(conn, user):
     :return a tuble  if user exist return (true, :user dn)
                       if user not exist return (False, None)
     """
-    base_dn = current_app.config["BASE_DN"]
+    base_dn = current_app.config["LDAP_BASE_DN"]
     if isinstance(conn, ldap3.Connection):
         search_filter = '(&(|(userPrincipalName={})(samaccountname={})(mail={})(name={}))(objectClass=person))'.format(
             user, user, user, user)
@@ -111,7 +111,7 @@ def search_all_user(conn):
     if isinstance(conn, ldap3.Connection):
         try:
             search_filter = '(objectClass=person)'
-            base_dn = current_app.config["BASE_DN"]
+            base_dn = current_app.config["LDAP_BASE_DN"]
             conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
                     attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
             users = json.loads(conn.response_to_json())['entries']
@@ -131,7 +131,7 @@ def search_page_user(conn, page, size):
     if isinstance(conn, ldap3.Connection):
         try:
             search_filter = '(objectClass=person)'
-            base_dn = current_app.config["BASE_DN"]
+            base_dn = current_app.config["LDAP_BASE_DN"]
             conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
                         attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
             users = json.loads(conn.response_to_json())['entries']
