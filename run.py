@@ -71,7 +71,7 @@ def create_app(config_name):
 
     return app
 
-app = create_app("prod")
+app = create_app("dev")
 
 if __name__ == '__main__':
     app.logger.info('服务器启动：http://0.0.0.0:5000')
