@@ -74,4 +74,4 @@ app = create_app("prod")
 
 if __name__ == '__main__':
     app.logger.info("服务器启动")
-    app.run()
+    app.run(host='0.0.0.0',port='5000')
