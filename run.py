@@ -55,7 +55,8 @@ def create_app(config_name):
     def after_request(response):
         # 跨域响应头
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'HEAD,OPTIONS,GET,POST,DELETE,PUT'
+        response.headers['Access-Control-Allow-Headers']= "x-requested-with,content-type"
         # json格式
         response.headers['Content-Type'] = 'application/json'
         return response
