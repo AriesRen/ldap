@@ -4,10 +4,11 @@
 # @date:2018/7/18.11:09
 
 from flask import Flask, g, current_app, jsonify
-from config import Config,DevConfig,ProdConfig
-from ldap.group import group_blueprints
-from ldap.user import user_blueprints
-from ldap.org import org_blueprints
+from config import config
+from api.group import group_blueprints
+from api.user import user_blueprints
+from api.org import org_blueprints
+
 
 try:
     import ldap3
@@ -15,10 +16,11 @@ except ImportError as e:
     raise e
 
 
-def create_app(object=ProdConfig):
+def create_app(config_name):
     app = Flask(__name__)
     # 加载配置
-    app.config.from_object(object)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
 
     # 每次请求重新加载conn
     @app.before_request
@@ -31,19 +33,30 @@ def create_app(object=ProdConfig):
 
             server = ldap3.Server(host=host, get_info=ldap3.ALL)
             g.conn = ldap3.Connection(server=server, user=admin, password=adminpwd)
+            # 连接
             g.conn.bind()
+            current_app.logger.info("连接成功：{}".format(g.conn))
+
+            # 开启tls连接
             g.conn.start_tls()
+            current_app.logger.info("开启TLS连接：".format(g.conn))
         except Exception as e:
+            current_app.logger.exception(e)
             return jsonify({"code": 500, "message": str(e)}), 500
 
     # 每次请求完毕关闭conn
     @app.teardown_request
     def teardown_request(exception):
+        # 关闭连接
         g.conn.unbind()
+        current_app.logger.info("关闭连接：".format(g.conn))
 
     @app.after_request
     def after_request(response):
+        # 跨域响应头
         response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Method'] = '*'
+        # json格式
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -57,8 +70,8 @@ def create_app(object=ProdConfig):
 
     return app
 
-app = create_app()
+app = create_app("prod")
 
 if __name__ == '__main__':
-   print (app.url_map)
-   app.run()
+    app.logger.info("服务器启动")
+    app.run()
