@@ -34,7 +34,7 @@ class DevConfig(Config):
     LDAP_BASE_DN = "DC=rhg,DC=com"
     # 管理员账号密码
     LDAP_ADMIN = "RHG\\Administrator"
-    LDAP_ADMIN_PWD = "!Password"
+    LDAP_ADMIN_PWD = "123456789"
 
     @classmethod
     def init_app(cls, app):

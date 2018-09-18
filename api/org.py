@@ -4,9 +4,9 @@
 # @date:2018/7/25.16:53
 
 from flask import Blueprint,jsonify, g, request,current_app
-from .ldap_tools import search_org
-from .ldap_tools import search_all_org
-from .ldap_tools import add_org
+from api.ldap_tools.org import search_org
+from api.ldap_tools.org import search_all_org
+from api.ldap_tools.org import add_org
 
 
 # 端点蓝图

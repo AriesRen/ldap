@@ -4,13 +4,9 @@
 # @date:2018/7/25.16:42
 
 from flask import current_app
-from .org import search_org
+from api.ldap_tools.org import search_org
 import json
-
-try:
-    import ldap3
-except ImportError as e:
-    raise e
+import ldap3
 
 
 # 添加用户
@@ -44,7 +40,7 @@ def add_user(conn, user=None):
         # 3、构造所需参数
         user_dn = "cn={},ou={},ou={},".format(uid, department, company) + current_app.config["LDAP_BASE_DN"]
         attributes = {"sn": sn, "givenName": givenName, "sAMAccountName": uid, "displayName": sn + givenName,
-                      "userPrincipalName": uid }
+                      "userPrincipalName": uid}
         objectClass = ['top', 'person', 'user', "organizationalPerson"]
         try:
             # 4、添加用户
@@ -54,10 +50,12 @@ def add_user(conn, user=None):
             # 6、更改密码
             c = modify_user_password(conn, uid, new_password=password)
             # 7、启动账户
-            d = conn.modify(user_dn, changes={"userAccountControl":(ldap3.MODIFY_REPLACE, [512])})
-            print(a,b,c,d)
-            print(conn.result['result'])
-            if a and b and c[0] and d and conn.result['result']==0:
+            d = conn.modify(user_dn, changes={"userAccountControl": (ldap3.MODIFY_REPLACE, [512])})
+            # 8、将用户添加到mcs组中
+            from .group import add_user_to_group
+            f = add_user_to_group(conn, uid=uid, group="mcs")[0]
+
+            if a and b and c[0] and d and f and conn.result['result'] == 0:
                 return (True, conn.result['description'])
             else:
                 return (False, conn.result['message'])
@@ -92,8 +90,11 @@ def search_user(conn, user):
     if isinstance(conn, ldap3.Connection):
         search_filter = '(&(|(userPrincipalName={})(samaccountname={})(mail={})(name={}))(objectClass=person))'.format(
             user, user, user, user)
-        conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
-                    attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES], size_limit=1)
+        conn.search(search_base=base_dn,
+                    search_filter=search_filter,
+                    search_scope=ldap3.SUBTREE,
+                    attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES],
+                    size_limit=1)
         users = json.loads(conn.response_to_json())['entries']
         if len(users) > 0:
             return (True, users[0])
@@ -101,6 +102,7 @@ def search_user(conn, user):
             return (False, "Not found this user")
     else:
         raise TypeError("conn shoud be a Connection")
+
 
 # 搜索所有用户
 def search_all_user(conn):
@@ -112,33 +114,51 @@ def search_all_user(conn):
         try:
             search_filter = '(objectClass=person)'
             base_dn = current_app.config["LDAP_BASE_DN"]
-            conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
-                    attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
+            conn.search(search_base=base_dn,
+                        search_filter=search_filter,
+                        search_scope=ldap3.SUBTREE,
+                        attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
             users = json.loads(conn.response_to_json())['entries']
+            print(users)
             return (True, users)
         except Exception as e:
             raise e
 
+
 # 分页查询用户
-def search_page_user(conn, page, size):
+def search_page_user(conn, paged_cookie=None, size=5):
     """
     分页查询用户信息
+    :param paged_cookie: 页cookie
     :param conn: 连接
-    :param page: page页
     :param size: 大小
     :return:
     """
     if isinstance(conn, ldap3.Connection):
         try:
-            search_filter = '(objectClass=person)'
+            total = 0
+            users = []
+            search_filter = '(objectClass=organizationalPerson)'
             base_dn = current_app.config["LDAP_BASE_DN"]
-            conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
-                        attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
-            users = json.loads(conn.response_to_json())['entries']
-            return (True, users)
+
+            entry_list = conn.extend.standard.paged_search(search_base=base_dn,
+                                                           search_filter=search_filter,
+                                                           search_scope=ldap3.SUBTREE,
+                                                           attributes=[ldap3.ALL_ATTRIBUTES,
+                                                                       ldap3.ALL_OPERATIONAL_ATTRIBUTES],
+                                                           paged_size=size,
+                                                           generator=False
+                                                           )
+            for entry in entry_list:
+                total += 1
+                print(entry)
+                users.append(entry)
+            print(len(entry_list))
+            users = conn.response_to_json()
+            return (True, users, len(users), total)
+
         except Exception as e:
             raise e
-
 
 
 # 修改用户密码
@@ -155,7 +175,7 @@ def modify_user_password(conn, user, new_password, old_password=None):
         if search_user(conn, user)[0]:
             user_dn = search_user(conn, user)[1]['dn']
             conn.extend.microsoft.modify_password(user=user_dn, new_password=new_password,
-                                                           old_password=old_password, controls=None)
+                                                  old_password=old_password, controls=None)
             if conn.result['result'] == 0:
                 return (True, conn.result['description'])
             else:

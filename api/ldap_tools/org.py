@@ -6,10 +6,8 @@
 
 from flask import current_app
 import json
-try:
-    import ldap3
-except ImportError as e:
-    raise e
+import ldap3
+
 
 
 # 搜索部门

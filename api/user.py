@@ -3,12 +3,14 @@
 # @author:ren
 # @date:2018/7/25.16:52
 
+import json
 from flask import Blueprint, jsonify, request, g,current_app
-from .ldap_tools import search_user
-from .ldap_tools import delete_user
-from .ldap_tools import add_user
-from .ldap_tools import modify_user_password
-from .ldap_tools import search_all_user
+from api.ldap_tools.user import search_user
+from api.ldap_tools.user import delete_user
+from api.ldap_tools.user import add_user
+from api.ldap_tools.user import modify_user_password
+from api.ldap_tools.user import search_all_user
+from api.ldap_tools.user import search_page_user
 
 # 端点蓝图
 user_blueprints = Blueprint("user", __name__, url_prefix="/user")
@@ -33,6 +35,17 @@ def user_info(uid):
     except Exception as e:
         current_app.logger.exception(e)
         return jsonify({"code": 500, "message": str(e)}), 500
+
+# # 分页查看用户
+# @user_blueprints.route("/<uid>", methods=['GET'])
+# def user_info(uid):
+#     try:
+#         args = json.dumps(request.args)
+#         current_app.logger.info(args)
+#         statsu, users, total, paged_cookie = search_page_user(conn=g.conn, size=5)
+#         return jsonify({"code":200, "data": args, "users": users, "total": total,"paged_cookie":paged_cookie}), 200
+#     except Exception as e:
+#         return jsonify({"code":500, "message": str(e)}), 500
 
 
 # 删除用户

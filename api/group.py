@@ -5,12 +5,12 @@
 
 from flask import Blueprint,jsonify,g,request, current_app
 
-from .ldap_tools import search_all_group
-from .ldap_tools import search_group
-from .ldap_tools import add_user_to_group
-from .ldap_tools import remove_user_from_group
-from .ldap_tools import delete_group
-from .ldap_tools import add_group
+from api.ldap_tools.group import search_all_group
+from api.ldap_tools.group import search_group
+from api.ldap_tools.group import add_user_to_group
+from api.ldap_tools.group import remove_user_from_group
+from api.ldap_tools.group import delete_group
+from api.ldap_tools.group import add_group
 
 
 # 端点蓝图

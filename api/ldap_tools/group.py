@@ -5,13 +5,9 @@
 
 from flask import current_app
 import json
-from .user import search_user
-from .org import search_org
-
-try:
-    import ldap3
-except ImportError as e:
-    raise e
+import ldap3
+from api.ldap_tools.user import search_user
+from api.ldap_tools.org import search_org
 
 
 # 搜索组
@@ -69,18 +65,17 @@ def add_group(conn, group, department, company):
             if search_group(conn, group)[0]:
                 return (False, "The group already exists")
             # 3、新增用户组
-            objectClass= ["top","group" ]
-            group_dn = "cn={},ou={},ou={},".format(group ,department, company) + current_app.config["LDAP_BASE_DN"]
-            attributes = {"name": group,"sAMAccountName":group}
+            objectClass = ["top", "group"]
+            group_dn = "cn={},ou={},ou={},".format(group, department, company) + current_app.config["LDAP_BASE_DN"]
+            attributes = {"name": group, "sAMAccountName": group}
 
-            res = conn.add(dn=group_dn,object_class=objectClass,attributes=attributes,controls=None)
+            res = conn.add(dn=group_dn, object_class=objectClass, attributes=attributes, controls=None)
             if res:
                 return (True, conn.result['description'])
             else:
                 return (False, conn.result['description'])
         except Exception as e:
             raise e
-
 
 
 # 添加成员
@@ -111,7 +106,7 @@ def add_user_to_group(conn, uid, group):
                     return (False, "The member is already in the group")
             conn.extend.microsoft.add_members_to_groups(members=members_dn, groups=groups_dn)
 
-            if conn.result['result']==0:
+            if conn.result['result'] == 0:
                 return (True, conn.result['description'])
             else:
                 return (False, conn.result['description'])
@@ -143,7 +138,7 @@ def remove_user_from_group(conn, uid, group):
                     return (False, "The member not exists in the group")
             conn.extend.microsoft.remove_members_from_groups(members=members_dn, groups=groups_dn)
 
-            if conn.result['result']==0:
+            if conn.result['result'] == 0:
                 return (True, conn.result['description'])
             else:
                 return (False, conn.result['description'])
@@ -159,4 +154,3 @@ def delete_group(conn, group):
         group_dn = search_group(conn, group)[1]['dn']
         res = conn.delete(group_dn, controls=None)
         return (res, conn.result["description"])
-

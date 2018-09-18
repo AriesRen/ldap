@@ -32,7 +32,7 @@ def create_app(config_name):
             adminpwd = current_app.config['LDAP_ADMIN_PWD']
 
             server = ldap3.Server(host=host, get_info=ldap3.ALL)
-            g.conn = ldap3.Connection(server=server, user=admin, password=adminpwd)
+            g.conn = ldap3.Connection(server=server, user=admin, password=adminpwd, auto_encode=True, auto_escape=True)
             # 连接
             g.conn.bind()
             current_app.logger.info("连接成功：{}".format(g.conn))
