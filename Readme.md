@@ -58,11 +58,11 @@ class ProdConfig(Config):
     DEBUG = False
 
     # 正式服务器地址
-    HOST = "172.16.0.3"
+    HOST = "***.***.***.***"
     # 正式服务器域名
     BASE_DN = "DC=bw,DC=local"
     # 管理员账号密码
-    ADMIN = "bw\\administrator"
+    ADMIN = "bw\\**********"
     # 管理员密码
-    ADMIN_PWD = "qaz.1234"
+    ADMIN_PWD = "********"
 ```
