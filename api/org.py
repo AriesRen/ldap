@@ -41,7 +41,6 @@ def org_add():
 @org_blueprints.route("", methods=['GET'])
 def orgs():
     """
-    分页未完成
     :return:
     """
     current_app.logger.info("查看所有部门")

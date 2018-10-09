@@ -21,8 +21,13 @@ def search_org(conn, ou=None):
     """
     base_dn = current_app.config["LDAP_BASE_DN"]
     if isinstance(conn, ldap3.Connection):
+        # 搜索条件，只搜索部门下的用户
         search_filter = '(&(|(name={})(ou={}))(objectClass=OrganizationalUnit))'.format(ou, ou)
-        conn.search(search_base=base_dn, search_filter=search_filter, search_scope=ldap3.SUBTREE,
+        conn.search(search_base=base_dn,
+                    dereference_aliases=ldap3.DEREF_SEARCH,
+                    search_filter=search_filter,
+                    get_operational_attributes=True,
+                    search_scope=ldap3.SUBTREE,
                     attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
 
         orgs = json.loads(conn.response_to_json())['entries']

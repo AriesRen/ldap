@@ -105,10 +105,10 @@ def user_put(uid):
         current_app.logger.info("更新用户{}密码：{}".format(uid, new_password))
         res, msg = modify_user_password(conn=g.conn, user=uid, new_password=new_password, old_password=old_password)
         if res:
-            current_app.logger.info("更新用户{}密码成功".format(uid))
+            current_app.logger.info("更新用户{}密码成功: {}".format(uid, msg))
             return jsonify({'code': 200, 'message': 'modify password success'})
         else:
-            current_app.logger.info("更新用户{}密码失败".format(uid))
+            current_app.logger.info("更新用户{}密码失败: {}".format(uid,msg))
             return jsonify({'code': 400, 'message': msg})
     except Exception as e:
         current_app.logger.exception(e)

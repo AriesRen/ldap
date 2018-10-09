@@ -115,11 +115,14 @@ def search_all_user(conn):
             search_filter = '(objectClass=person)'
             base_dn = current_app.config["LDAP_BASE_DN"]
             conn.search(search_base=base_dn,
+                        # 搜索条件
                         search_filter=search_filter,
+                        # 向下搜索子节点
                         search_scope=ldap3.SUBTREE,
+                        # 需要哪些属性
                         attributes=[ldap3.ALL_ATTRIBUTES, ldap3.ALL_OPERATIONAL_ATTRIBUTES])
+            # json序列化
             users = json.loads(conn.response_to_json())['entries']
-            print(users)
             return (True, users)
         except Exception as e:
             raise e
@@ -176,6 +179,7 @@ def modify_user_password(conn, user, new_password, old_password=None):
             user_dn = search_user(conn, user)[1]['dn']
             conn.extend.microsoft.modify_password(user=user_dn, new_password=new_password,
                                                   old_password=old_password, controls=None)
+            current_app.logger.info("修改密码：".format(conn.result))
             if conn.result['result'] == 0:
                 return (True, conn.result['description'])
             else:
