@@ -64,11 +64,11 @@ class ProdConfig(Config):
     PORT = '5000'
 
     # 正式服务器
-    LDAP_HOST = ""
-    LDAP_BASE_DN = ""
+    LDAP_HOST = "172.16.0.3"
+    LDAP_BASE_DN = "DC=bw,DC=local"
     # 管理员账号密码
-    LDAP_ADMIN = ""
-    LDAP_ADMIN_PWD = ""
+    LDAP_ADMIN = "bw\\administrator"
+    LDAP_ADMIN_PWD = "qaz.1234"
 
     @classmethod
     def init_app(cls, app):
